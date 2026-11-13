@@ -849,8 +849,9 @@
       const mailEl = document.getElementById('authMail');
       if (!btn || typeof sbResolveAuth !== 'function') return;
 
+      const HUB_ON = ((typeof MANIFEST !== 'undefined' && MANIFEST && MANIFEST.auth) || {}).hub !== false;
       function render(u) {
-        btn.hidden = false;
+        btn.hidden = !HUB_ON || false;
         if (u) {
           const name = (u.name || u.email || '').trim();
           label.textContent = (u.email || name).split('@')[0].slice(0, 14);
