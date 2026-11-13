@@ -195,6 +195,16 @@
     }
     .site-footer a { color: var(--accent); text-decoration: none; }
     .site-footer a:hover { text-decoration: underline; }
+    .attribution-warning {
+      margin: 0 auto 12px;
+      max-width: 900px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #8a4600;
+      background: #fff4e5;
+      border: 1px solid #ffd8a8;
+      border-radius: 8px;
+    }
 
     /* ---------- 移动端 ---------- */
     .menu-btn {
@@ -256,18 +266,24 @@
         </a>
       </header>
       <article class="content" id="content"></article>
-      <footer class="site-footer">
-        本站由 <a id="footerLink" href="#" target="_blank" rel="noopener">r6t5-docs</a> 提供支持<span id="footerProNote"></span>
-      </footer>
+      <footer class="site-footer" id="siteFooter">本站由<a id="footerLink" href="https://github.com/TanchiPanda/r6t5-docs-community" target="_blank" rel="noopener">r6t5-docs</a>提供支持<span id="footerProNote">，使用专业版、订制版可去除本标志</span></footer>
     </div>
   </div>
 
   <script>
     const REPO = 'TanchiPanda/r6t5-docs';
     const DEFAULT_PATH = 'docs/index.md';
-    // 页脚署名：templateRepo 为模板仓库；showProNote 控制是否显示“专业版/订制版可去除”提示
+    // ---------- 署名（社区版授权要求：一字不得修改，链接必须指向模板仓库） ----------
+    const ATTRIBUTION = {
+      name: 'r6t5-docs',
+      base: '本站由r6t5-docs提供支持',
+      proNote: '，使用专业版、订制版可去除本标志',
+      canonical: '本站由r6t5-docs提供支持，使用专业版、订制版可去除本标志',
+      templateUrl: 'https://github.com/TanchiPanda/r6t5-docs-community'
+    };
+
+    // 页脚署名开关：showProNote 为 false 须持有专业版/订制版授权
     const FOOTER = {
-      templateRepo: 'TanchiPanda/r6t5-docs-community',
       showProNote: false
     };
 
@@ -278,18 +294,46 @@
     const copyBtn = document.getElementById('copyBtn');
     const copyBtnText = document.getElementById('copyBtnText');
     const copyMenu = document.getElementById('copyMenu');
+    const siteFooter = document.getElementById('siteFooter');
 
     let rawMarkdown = '';
 
-    // 页脚署名渲染
-    const footerLink = document.getElementById('footerLink');
-    const footerProNote = document.getElementById('footerProNote');
-    footerLink.href = 'https://github.com/' + FOOTER.templateRepo;
-    if (FOOTER.showProNote) {
-      footerProNote.textContent = '，使用专业版、订制版可去除本标志';
-    } else {
-      footerProNote.remove();
-    }
+    // 页脚署名：渲染期望文案，并与实际 DOM 逐字符比对；不符则提示并自动恢复
+    (function enforceAttribution() {
+      const expected = FOOTER.showProNote ? ATTRIBUTION.canonical : ATTRIBUTION.base;
+      if (!FOOTER.showProNote) {
+        const note = document.getElementById('footerProNote');
+        if (note) note.remove();
+      }
+      const link = document.getElementById('footerLink');
+      if (link) {
+        link.href = ATTRIBUTION.templateUrl;
+        link.textContent = ATTRIBUTION.name;
+      }
+      if (siteFooter.textContent !== expected) {
+        siteFooter.innerHTML = '';
+        const a = document.createElement('a');
+        a.id = 'footerLink';
+        a.href = ATTRIBUTION.templateUrl;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = ATTRIBUTION.name;
+        siteFooter.appendChild(document.createTextNode('本站由'));
+        siteFooter.appendChild(a);
+        siteFooter.appendChild(document.createTextNode('提供支持'));
+        if (FOOTER.showProNote) {
+          const span = document.createElement('span');
+          span.id = 'footerProNote';
+          span.textContent = ATTRIBUTION.proNote;
+          siteFooter.appendChild(span);
+        }
+        const warn = document.createElement('div');
+        warn.className = 'attribution-warning';
+        warn.textContent = '本页署名被删改，已按《r6t5-docs 社区版授权条款》恢复。商业使用请保留完整署名。';
+        siteFooter.parentNode.insertBefore(warn, siteFooter);
+        console.warn('[r6t5-docs] 署名被删改，已自动恢复');
+      }
+    })();
 
     marked.setOptions({ gfm: true, breaks: true });
 
