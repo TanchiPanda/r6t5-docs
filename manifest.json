@@ -1,17 +1,22 @@
 {
   "tree": [
     {
-      "title": "入门指南",
+      "title": "帮助中心",
       "children": [
-        { "title": "首页", "path": "docs/index.md" },
-        { "title": "快速开始", "path": "docs/guide/getting-started.md" },
-        { "title": "目录结构", "path": "docs/guide/structure.md" }
+        { "title": "登录帮助", "path": "docs/help/login.md" }
       ]
     },
     {
-      "title": "参考",
+      "title": "法律条款",
       "children": [
-        { "title": "配置说明", "path": "docs/reference/config.md" }
+        { "title": "账户许可协议", "path": "docs/legal/terms.md" },
+        { "title": "隐私政策", "path": "docs/legal/privacy.md" }
+      ]
+    },
+    {
+      "title": "实验室",
+      "children": [
+        { "title": "实验室公约", "path": "docs/lab/convention.md" }
       ]
     }
   ]

@@ -19,9 +19,14 @@ https://TanchiPanda.github.io/r6t5-docs/
 ## 目录结构
 
 ```text
-├── index.html          # 站点渲染器
-├── manifest.json       # 文档目录清单
-└── docs/               # Markdown 文档
+├── index.html              # 站点渲染器
+├── manifest.json           # 文档目录清单
+└── docs/
+    ├── index.md            # 站点首页
+    ├── help/login.md       # 登录帮助
+    ├── legal/terms.md      # 账户许可协议
+    ├── legal/privacy.md    # 隐私政策
+    └── lab/convention.md   # 实验室公约
 ```
 
 ## 本地预览
