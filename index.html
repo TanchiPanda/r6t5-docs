@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>r6t5 文档</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="sbauth.js?v=20261113"></script>
   <style>
     :root {
       --bg: #ffffff;
@@ -272,6 +273,21 @@
     .prop:last-child{border-bottom:none}
     .prop span{color:#8d99bb}
     .prop b{font-weight:600;word-break:break-all;text-align:right}
+    /* ---------- 账号（r6t5-hub 统一认证） ---------- */
+    .auth-wrap{position:relative;flex:0 0 auto}
+    .auth-btn{display:flex;align-items:center;gap:7px;height:32px;padding:0 10px;border:1px solid var(--line);border-radius:9px;
+      background:var(--panel);color:var(--text);font-size:12.5px;cursor:pointer}
+    .auth-btn:hover{border-color:var(--accent)}
+    .auth-avatar{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);
+      color:#fff;font-size:11px;font-weight:700;text-transform:uppercase}
+    .auth-menu{position:absolute;right:0;top:38px;min-width:210px;padding:8px;border-radius:11px;background:var(--panel);
+      border:1px solid var(--line);box-shadow:0 14px 40px rgba(0,0,0,.35);z-index:50}
+    .auth-mail{font-size:12px;color:var(--muted);padding:4px 8px 9px;border-bottom:1px solid var(--line);margin-bottom:6px;
+      word-break:break-all}
+    .auth-menu button{width:100%;text-align:left;padding:8px;border:none;border-radius:8px;background:none;color:var(--text);
+      font-size:12.5px;cursor:pointer}
+    .auth-menu button:hover{background:rgba(110,168,254,.12)}
+    @media (max-width:720px){.auth-label,.auth-btn span:not(.auth-avatar){display:none}}
 </style>
 </head>
 <body>
@@ -304,6 +320,16 @@
             <button type="button" data-type="markdown">复制 Markdown</button>
             <button type="button" data-type="xml">复制 XML<span class="menu-desc">（渲染后标签）</span></button>
             <button type="button" data-type="text">复制纯文本</button>
+          </div>
+        </div>
+        <div class="auth-wrap" id="authWrap">
+          <button class="auth-btn" id="authBtn" hidden>
+            <span class="auth-avatar" id="authAvatar">·</span>
+            <span id="authLabel">登录</span>
+          </button>
+          <div class="auth-menu" id="authMenu" hidden>
+            <div class="auth-mail" id="authMail"></div>
+            <button type="button" id="authLogout">退出登录</button>
           </div>
         </div>
         <a class="edit-btn" id="editBtn" target="_blank" rel="noopener">
@@ -813,6 +839,55 @@
       document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
       document.addEventListener('mousedown', e => { if (menu && !e.target.closest('.ctx-menu')) close(); });
       window.addEventListener('scroll', close, true);
+    })();
+    // ---------- 账号：R6T5 Hub 统一认证（open-platform） ----------
+    (function initAuth() {
+      const btn = document.getElementById('authBtn');
+      const label = document.getElementById('authLabel');
+      const avatar = document.getElementById('authAvatar');
+      const menuEl = document.getElementById('authMenu');
+      const mailEl = document.getElementById('authMail');
+      if (!btn || typeof sbResolveAuth !== 'function') return;
+
+      function render(u) {
+        btn.hidden = false;
+        if (u) {
+          const name = (u.name || u.email || '').trim();
+          label.textContent = (u.email || name).split('@')[0].slice(0, 14);
+          avatar.textContent = (name.slice(0, 1) || 'U');
+          mailEl.textContent = u.email || '';
+        } else {
+          label.textContent = '登录';
+          avatar.textContent = '·';
+        }
+      }
+
+      btn.addEventListener('click', async () => {
+        const u = await sbResolveAuth(true);
+        if (u) { menuEl.hidden = !menuEl.hidden; return; }
+        msLogin({ returnTo: location.href });
+      });
+
+      document.getElementById('authLogout').addEventListener('click', async () => {
+        menuEl.hidden = true;
+        try { await msLogout(location.href); } catch (e) { location.reload(); }
+      });
+
+      document.addEventListener('click', e => { if (!e.target.closest('#authWrap')) menuEl.hidden = true; });
+      document.addEventListener('sb:auth', e => render(e.detail && e.detail.user));
+
+      // 只有 URL 里带回凭证时才做完整的会话解析（会写 localStorage、清失效 cookie）；
+      // Hub 普通登录回跳是纯 cookie（ms_user），此时必须保留 cookie，否则一回来就掉登录
+      (async () => {
+        const hasUrlCred = location.hash.indexOf('access_token=') >= 0
+          || new URLSearchParams(location.search).has('code');
+        try {
+          if (hasUrlCred) { await sbResolveAuth(true); render(sbGetUser()); }
+          else { render(sbGetUser()); }
+        } catch (e) {
+          render(typeof sbGetUser === 'function' ? sbGetUser() : null);
+        }
+      })();
     })();
 </script>
 </body>
