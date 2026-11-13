@@ -184,6 +184,18 @@
     .content a { color: var(--accent); }
     .content img { max-width: 100%; }
 
+    /* ---------- 页脚署名 ---------- */
+    .site-footer {
+      padding: 16px 28px 24px;
+      font-size: 12px;
+      color: var(--text-muted);
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .site-footer a { color: var(--accent); text-decoration: none; }
+    .site-footer a:hover { text-decoration: underline; }
+
     /* ---------- 移动端 ---------- */
     .menu-btn {
       display: none;
@@ -244,12 +256,20 @@
         </a>
       </header>
       <article class="content" id="content"></article>
+      <footer class="site-footer">
+        本站由 <a id="footerLink" href="#" target="_blank" rel="noopener">r6t5-docs</a><span id="footerProNote"></span>
+      </footer>
     </div>
   </div>
 
   <script>
     const REPO = 'TanchiPanda/r6t5-docs';
     const DEFAULT_PATH = 'docs/index.md';
+    // 页脚署名：templateRepo 为模板仓库；showProNote 控制是否显示“专业版/订制版可去除”提示
+    const FOOTER = {
+      templateRepo: 'TanchiPanda/r6t5-docs-community',
+      showProNote: false
+    };
 
     const treeEl = document.getElementById('tree');
     const contentEl = document.getElementById('content');
@@ -260,6 +280,16 @@
     const copyMenu = document.getElementById('copyMenu');
 
     let rawMarkdown = '';
+
+    // 页脚署名渲染
+    const footerLink = document.getElementById('footerLink');
+    const footerProNote = document.getElementById('footerProNote');
+    footerLink.href = 'https://github.com/' + FOOTER.templateRepo;
+    if (FOOTER.showProNote) {
+      footerProNote.textContent = '，使用专业版、订制版可去除本标志';
+    } else {
+      footerProNote.remove();
+    }
 
     marked.setOptions({ gfm: true, breaks: true });
 
